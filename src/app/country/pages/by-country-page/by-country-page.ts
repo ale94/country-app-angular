@@ -24,14 +24,4 @@ export class ByCountryPage {
     }
   })
 
-  // countryResource = resource({
-  //   params: () => ({ query: this.query() }),
-  //   loader: async ({ params }) => {
-  //     if (!params.query) return [];
-  //     return await firstValueFrom(
-  //       this.countryService.searchByCountry(params.query)
-  //     )
-  //   }
-  // })
-
 }
