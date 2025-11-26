@@ -14,6 +14,7 @@ export class CountryService {
 
   private http = inject(HttpClient);
   private queryCacheCapital = new Map<string, Country[]>();
+  private queryCacheCountry = new Map<string, Country[]>();
 
   searchByCapital(query: string): Observable<Country[]> {
     query = query.toLowerCase()
@@ -25,18 +26,21 @@ export class CountryService {
         map(resp => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
         tap(countries => this.queryCacheCapital.set(query, countries)),
         catchError(error => {
-          // console.log("Error fetching", error);
           return throwError(() => new Error(`No se pudo obtener paises con ese query ${query}`))
         })
       )
   }
 
   searchByCountry(query: string): Observable<Country[]> {
-    return this.http.get<RESTCountry[]>(`${API_URL}/name/${query.toLowerCase()}`)
+    query = query.toLowerCase()
+    if (this.queryCacheCountry.has(query)) {
+      return of(this.queryCacheCountry.get(query) ?? [])
+    }
+    return this.http.get<RESTCountry[]>(`${API_URL}/name/${query}`)
       .pipe(
         map(resp => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
+        tap(countries => this.queryCacheCountry.set(query, countries)),
         catchError(error => {
-          // console.log("Error fetching", error);
           return throwError(() => new Error(`No se pudo obtener paises con ese query ${query}`))
         })
       )
@@ -48,7 +52,6 @@ export class CountryService {
         map(resp => CountryMapper.mapRestCountryArrayToCountryArray(resp)),
         map(countries => countries.at(0)!),
         catchError(error => {
-          // console.log("Error fetching", error);
           return throwError(() => new Error(`No se pudo obtener paises con ese query ${code}`))
         })
       )
